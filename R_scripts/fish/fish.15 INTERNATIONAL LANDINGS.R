@@ -17,7 +17,7 @@ eez_size <- 2.385178e+12 #Norwegian fishing zone
 
 
   
-Guilds <- unique(read.csv2("./Data/MiMeMo fish guilds.csv")$Guild)           # Get vector of guilds
+Guilds <- unique(read.csv2("./Data/MiMeMo fish guilds.csv",check.names = FALSE)$Guild)           # Get vector of guilds
 
 Inflation <- readRDS("./Objects/ICES landings inflation.rds") %>%           # Rule to convert non-russian to international landings from ICES
   right_join(data.frame(Guild = Guilds)) %>%                                # Introduce missing guilds

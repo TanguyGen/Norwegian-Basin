@@ -3,7 +3,7 @@
 #### Set up ####
 
 rm(list=ls())                                                                 # Wipe the brain
-packages <- c("tidyverse")                   # List packages
+packages <- c("tidyverse","sf")                   # List packages
 lapply(packages, library, character.only = TRUE)                              # Load packages
 
 Domains <- st_transform(readRDS("./Objects/Domains.rds"), crs = 4326) %>%     
@@ -15,8 +15,8 @@ gear <- read.csv2("./Data/MiMeMo gears.csv", check.names = FALSE) # Import gear 
 
 #################### For Iceland
 
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv") %>%                        # Import guild names
-  dplyr::select(Guild, Statistics.Iceland) %>%
+guild <- read.csv2("./Data/MiMeMo fish guilds.csv",check.names = FALSE) %>%                        # Import guild names
+  dplyr::select(Guild, `Statistics Iceland`) %>%
   setNames(c("Guild","Species"))%>% 
   drop_na() %>% 
   distinct() %>%                                                              # Drop duplicated rows which hang around after ditching other systems
@@ -28,7 +28,7 @@ landings_target <- expand.grid(Guild = unique(guild$Guild), # reintroduces guild
                                Aggregated_gear = unique(gear$Aggregated_gear),
                                Year = 2010:2019) # Get combinations of gear, guild, and year to reintroduce unrepresented levels
 Iceland_landings <- read.csv2("./Data/Iceland_Faroe/Iceland_landings.csv",check.names = FALSE)%>%
-  mutate(across(everything(), ~ifelse(. == "..", NA, .)))%>%  
+  mutate(across(everything(), ~ifelse(. == "..", NA, .)))%>%  #Change empty boxes  written with a "." by NAs
   setNames(c("Species","Fishing gear","Fishing.area","Unit","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019"))%>%
   pivot_longer(cols = `2010`:`2019`,names_to = "Year",values_to = "Tonnes")%>%
   left_join(gear)%>%
@@ -55,7 +55,7 @@ saveRDS(Iceland_landings, "./Objects/Iceland landings by gear and guild.rds")
 #################### For Faroe
 
 guild <- read.csv2("./Data/MiMeMo fish guilds.csv") %>%                        # Import guild names
-  dplyr::select(Guild, Hagstova.f.rorya) %>%
+  dplyr::select(Guild, `Hagstova.fororya`) %>%
   setNames(c("Guild","species"))%>%
   drop_na() %>%                                                               # Drop those without correspondance with Faroe data
   distinct() %>%                                                              # Drop duplicated rows which hang around after ditching other systems
@@ -68,10 +68,10 @@ landings_target_fro <- expand.grid(Guild = unique(guild$Guild), # reintroduces g
                                Year = 2015:2019) # Get combinations of gear, guild, and year to reintroduce unrepresented levels
 Faroe_landings <- read.csv2("./Data/Iceland_Faroe/Faroe_landings.csv", check.names = FALSE)%>%
   pivot_longer(cols = matches("^\\d{4}"), names_to = "Year_Month", values_to = "Tonnes") %>%
-  mutate(across(Tonnes, ~ifelse(. == "-", NA, .)))%>% 
+  mutate(across(Tonnes, ~ifelse(. == "-", NA, .)))%>% #Change empty boxes written with a "-" by NAs
   mutate(Tonnes=as.numeric(Tonnes))%>%
   separate(Year_Month, into = c("Year", "Month"), sep = " ", convert = TRUE)%>%
-  group_by(Year) %>%
+  group_by(Year,species,`fishing gear`) %>%
   mutate(Tonnes = sum(Tonnes, na.rm = TRUE))%>%
   dplyr::select(species,`fishing gear`,Year,Tonnes)%>%
   unique()%>%

@@ -8,7 +8,7 @@ library(tidyverse)
 
 gears <- unique(read.csv2("./Data/MiMeMo gears.csv")$Aggregated_gear)          # Load fishing gear classifications
 
-guild <- unique(read.csv2("./Data/MiMeMo fish guilds.csv")$Guild)              # Get guilds
+guild <- unique(read.csv2("./Data/MiMeMo fish guilds.csv",check.names = FALSE)$Guild)              # Get guilds
 
 landings_target <- expand.grid(Guild = guild, 
                                Aggregated_gear = gears) %>%                   # Get combinations of gear and guild

@@ -8,7 +8,7 @@ rm(list=ls())                                                               # Wi
 packages <- c("tidyverse")                                                  # List packages
 lapply(packages, library, character.only = TRUE)                            # Load packages
 
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv") %>% 
+guild <- read.csv2("./Data/MiMeMo fish guilds.csv",check.names = FALSE) %>% 
   dplyr::select(Guild, Category, Subcategory) %>% 
   distinct
 

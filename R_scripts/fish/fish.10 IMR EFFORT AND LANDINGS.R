@@ -107,6 +107,7 @@ corrected_IMR <- rownames_to_column(IMR, var = "Feature") %>%  # Create a column
 saveRDS(corrected_IMR, "./Objects/IMR regional absolute effort and landings.rds")
 
 #### Convert IMR landings to a matrix by guild and gear ####
+guild <- read.csv2("./Data/MiMeMo fish guilds.csv")
 
 landings_target <- expand.grid(Guild = unique(guild$Guild), # Forces birds and pinnipeds back in 
                       Aggregated_gear = unique(gear$Aggregated_gear) )      # Get combinations of gear and guild
@@ -143,7 +144,7 @@ effort <- st_drop_geometry(corrected_IMR) %>%                                 # 
   .[order(row.names(.)),]                                                     # Alphabetise rows to ensure a match with other objects
 
 saveRDS(effort, "./Objects/IMR absolute fishing effort.rds")                  # Save
-
+c<-readRDS("./Objects/IMR absolute fishing effort.rds")
 #### visual checks ####
 
 # library(ggnewscale)

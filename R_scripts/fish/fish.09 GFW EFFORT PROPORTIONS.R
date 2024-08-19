@@ -85,6 +85,7 @@ Proportion_effort_dredge <-c(
   rbindlist()
 
 gear <- read.csv2("./Data/MiMeMo gears.csv")   
+
 Proportion_effort<-data.table::rbindlist(list(Proportion_effort_pole_and_line,Proportion_effort_pots_and_traps,Proportion_effort_seiners,Proportion_effort_trawlers,Proportion_effort_dredge)) %>% 
   pivot_longer(starts_with("sum"), names_to = "Year", values_to = "Hours") %>%# Reshape so all years are in a column
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-") %>%# Split variable name into flag and gear type
