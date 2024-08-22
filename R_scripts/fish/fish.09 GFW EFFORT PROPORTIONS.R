@@ -43,12 +43,12 @@ Proportion_effort_pots_and_traps <- c(
   rbindlist()
 
 Proportion_effort_seiners <- c(
-  "NOR-seiners",
-  "FRO-seiners",
-  "ISL-seiners",
-  "RUS-seiners",
-  "EU+UK-seiners",
-  "REST-seiners"
+  "NOR-Pelagic_trawls & seines",
+  "FRO-Pelagic_trawls & seines",
+  "ISL-Pelagic_trawls & seines",
+  "RUS-Pelagic_trawls & seines",
+  "EU+UK-Pelagic_trawls & seines",
+  "REST-Pelagic_trawls & seines"
 )%>%
   future_map(~{ brick("./Objects/GFW_seiners.nc", varname = .x) %>%                   # Import a brick of all years
       exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 
@@ -57,12 +57,12 @@ Proportion_effort_seiners <- c(
   rbindlist()
 
 Proportion_effort_trawlers <- c(
-  "NOR-trawlers",
-  "FRO-trawlers",
-  "ISL-trawlers",
-  "RUS-trawlers",
-  "EU+UK-trawlers",
-  "REST-trawlers"
+  "NOR-Shelf_trawlers",
+  "FRO-Shelf_trawlers",
+  "ISL-Shelf_trawlers",
+  "RUS-Shelf_trawlers",
+  "EU+UK-Shelf_trawlers",
+  "REST-Shelf_trawlers"
 )%>%
   future_map(~{ brick("./Objects/GFW_trawlers.nc", varname = .x) %>%                   # Import a brick of all years
       exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 

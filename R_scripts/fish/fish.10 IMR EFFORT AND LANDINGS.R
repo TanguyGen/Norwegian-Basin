@@ -33,11 +33,11 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "NOR-pots_and_traps") %>%  
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "NOR-seiners") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "NOR-Pelagic_trawls & seines") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "NOR-trawlers") %>%      # For each class of gear
+GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "NOR-Shelf_trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -144,7 +144,6 @@ effort <- st_drop_geometry(corrected_IMR) %>%                                 # 
   .[order(row.names(.)),]                                                     # Alphabetise rows to ensure a match with other objects
 
 saveRDS(effort, "./Objects/IMR absolute fishing effort.rds")                  # Save
-c<-readRDS("./Objects/IMR absolute fishing effort.rds")
 #### visual checks ####
 
 # library(ggnewscale)

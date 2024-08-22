@@ -114,18 +114,14 @@ Inflation_dredge <- c(
 
 Inflation<-rbind(Inflation_pole_and_line,Inflation_pots_and_traps,Inflation_seiners,Inflation_trawlers,Inflation_dredge)%>%
   group_by(Gear_type) %>%                                                   # Now for each gear type
-  mutate(total_gear_effort = sum(Hours)) %>%                                # Total effort
-  filter(!Flag %in% c("RUS","FRO","ISL")) %>%                                                 # Don't need Russian data anymore
-  summarise(Inflation = mean(total_gear_effort)/sum(Hours))%>%              # How do we get from non-Russian effort to our known total?
+  mutate(total_gear_effort = sum(Hours)) %>% 
+  filter(!Flag %in% c("RUS")) %>%                                                 # Don't need Russian data anymore
+  summarise(Inflation = mean(total_gear_effort)/sum(Hours))%>%            # How do we get from non-Russian effort to our known total?
   ungroup() %>%
-  right_join(target) %>%                                                    # Bind to all gear names
+  right_join(target) %>% 
   mutate(Inflation = ifelse(Aggregated_gear %in% c("Harpoons", "Rifles", "Kelp harvesting", "Recreational"),
-                            1, Inflation)) %>%
-  unique()%>%
+                          1, Inflation)) %>%
   drop_na()%>%
-  group_by(Aggregated_gear)%>%
-  summarize(across(Inflation, ~sum(.) - length(.)+1))%>%
-  ungroup()%>%
   column_to_rownames('Aggregated_gear') %>%                                 # Match names to EU and IMR objects
   dplyr::select(Inflation) %>%                                              # Select only numeric column
   as.matrix() %>%                                                           # Convert to matrix
@@ -144,6 +140,7 @@ transformed_International <- (International / 365) *                        # Co
 transformed_International["Kelp harvesting"] <- 1                           # We need a nominal effort even though real values are 0
 
 saveRDS(transformed_International, "./Objects/International effort by gear.rds")
-write.csv(transformed_International, "./target/International effort by gear.csv")
 
+
+readRDS("./Objects/International effort by gear.rds")
 

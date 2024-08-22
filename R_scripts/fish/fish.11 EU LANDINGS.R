@@ -44,11 +44,11 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "EU+UK-pots_and_traps") %>%
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-seiners") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-Pelagic_trawls & seines") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "EU+UK-trawlers") %>%      # For each class of gear
+GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "EU+UK-Shelf_trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
