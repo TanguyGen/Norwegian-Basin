@@ -11,7 +11,7 @@ Domains <- st_transform(readRDS("./Objects/Domains.rds"), crs = 4326) %>%
   st_as_sf() %>% 
   mutate(Keep = T)
 
-gear <- read.csv2("./Data/MiMeMo gears.csv", check.names = FALSE) # Import gear names
+gear <- read.csv("./Data/MiMeMo gears.csv", check.names = FALSE) # Import gear names
 
 #################### For Iceland
 

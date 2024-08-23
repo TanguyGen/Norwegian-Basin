@@ -22,11 +22,15 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "EU+UK-pots_and_traps") %>%
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-seiners") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-Seiners") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "EU+UK-trawlers") %>%      # For each class of gear
+GFW_strawlers <- brick("./Objects/GFW_strawlers.nc", varname = "EU+UK-Shelf_trawlers") %>%      # For each class of gear
+  calc(mean, na.rm = T)%>%
+  projectRaster(crs = crs(Domains))
+
+GFW_ptrawlers <- brick("./Objects/GFW_ptrawlers.nc", varname = "EU+UK-Pelagic_trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -63,17 +67,20 @@ on.exit(options(oopts))
 corrected_effort <- dplyr::select(EU_Arctic, EU_polygon, Gear_type) %>%       # Limit to information needed to calculate the proportion of fishing effort in the model domain
   split(f = as.factor(as.numeric(.$EU_polygon))) %>%                                                     # Isolate each shape for fast paralel processing
   future_map( ~{                                                              # In parallel
-    mutate(.x, total=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
-                                       Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
-                                       Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
-                                       Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
-                                       Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum"))) %>% # This is the total effort to scale features to within a polygon
-      st_intersection(domain) %>%                                             # Crop the polygons to the model domain
-      mutate(feature =case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
-                                       Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
-                                       Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
-                                       Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
-                                       Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum"))) %>% 
+    mutate(.x, total=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
+                               Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
+                               Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+                               Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
+                               Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
+                               Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>%                        # If this is a mobile gear) 
+      # This is the total effort to scale features to within a polygon
+      st_intersection(Domains) %>%     # Crop the polygons to the model domain
+      mutate(feature=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
+                               Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
+                               Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+                               Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
+                               Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
+                               Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>% 
                st_drop_geometry()}, .progress = T) %>%            
   data.table::rbindlist() %>%                                                 # Bind each fishing feature back into a DF
   mutate(GFW_Scale = feature/total) %>%                                       # Get the proportion of effort per polygon in the domain

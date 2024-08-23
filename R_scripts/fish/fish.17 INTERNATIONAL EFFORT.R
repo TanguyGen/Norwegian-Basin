@@ -63,12 +63,12 @@ Inflation_pots_and_traps <- c(
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-")
 
 Inflation_seiners <- c(
-  "NOR-seiners",
-  "FRO-seiners",
-  "ISL-seiners",
-  "RUS-seiners",
-  "EU+UK-seiners",
-  "REST-seiners"
+  "NOR-Seiners",
+  "FRO-Seiners",
+  "ISL-Seiners",
+  "RUS-Seiners",
+  "EU+UK-Seiners",
+  "REST-Seiners"
 )%>% 
   future_map(~{ brick("./Objects/GFW_seiners.nc", varname = .x) %>%                 # Import a brick of all years
       calc(mean, na.rm = T) %>%                                             # Take the mean across years
@@ -77,21 +77,35 @@ Inflation_seiners <- c(
   data.table::rbindlist() %>% 
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-") 
 
-Inflation_trawlers <- c(
-  "NOR-trawlers",
-  "FRO-trawlers",
-  "ISL-trawlers",
-  "RUS-trawlers",
-  "EU+UK-trawlers",
-  "REST-trawlers"
+Inflation_ptrawlers <- c(
+  "NOR-Pelagic_trawlers",
+  "FRO-Pelagic_trawlers",
+  "ISL-Pelagic_trawlers",
+  "RUS-Pelagic_trawlers",
+  "EU+UK-Pelagic_trawlers",
+  "REST-Pelagic_trawlers"
 )%>% 
-  future_map(~{ brick("./Objects/GFW_trawlers.nc", varname = .x) %>%                 # Import a brick of all years
+  future_map(~{ brick("./Objects/GFW_ptrawlers.nc", varname = .x) %>%                 # Import a brick of all years
       calc(mean, na.rm = T) %>%                                             # Take the mean across years
       exact_extract(st_as_sf(domain), fun = "sum") %>%                      # Sum fishing hours within the model domain 
       data.frame(Hours = ., Variable = .x)}, .progress = T)%>%             # Attach the variable name to keep track
   data.table::rbindlist() %>% 
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-")
 
+Inflation_strawlers <- c(
+  "NOR-Shelf_trawlers",
+  "FRO-Shelf_trawlers",
+  "ISL-Shelf_trawlers",
+  "RUS-Shelf_trawlers",
+  "EU+UK-Shelf_trawlers",
+  "REST-Shelf_trawlers"
+)%>% 
+  future_map(~{ brick("./Objects/GFW_strawlers.nc", varname = .x) %>%                 # Import a brick of all years
+      calc(mean, na.rm = T) %>%                                             # Take the mean across years
+      exact_extract(st_as_sf(domain), fun = "sum") %>%                      # Sum fishing hours within the model domain 
+      data.frame(Hours = ., Variable = .x)}, .progress = T)%>%             # Attach the variable name to keep track
+  data.table::rbindlist() %>% 
+  separate(Variable, into = c("Flag", "Gear_type"), sep = "-")
 
 Inflation_dredge <- c(
   "NOR-dredge_fishing",
@@ -112,10 +126,10 @@ Inflation_dredge <- c(
 
 
 
-Inflation<-rbind(Inflation_pole_and_line,Inflation_pots_and_traps,Inflation_seiners,Inflation_trawlers,Inflation_dredge)%>%
+Inflation<-rbind(Inflation_pole_and_line,Inflation_pots_and_traps,Inflation_seiners,Inflation_strawlers,Inflation_ptrawlers,Inflation_dredge)%>%
   group_by(Gear_type) %>%                                                   # Now for each gear type
   mutate(total_gear_effort = sum(Hours)) %>% 
-  filter(!Flag %in% c("RUS")) %>%                                                 # Don't need Russian data anymore
+  filter(!Flag %in% c("RUS","FRO","ISL")) %>%                                                 # Don't need Russian, Faroe or Iceland data anymore
   summarise(Inflation = mean(total_gear_effort)/sum(Hours))%>%            # How do we get from non-Russian effort to our known total?
   ungroup() %>%
   right_join(target) %>% 

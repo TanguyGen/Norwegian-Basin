@@ -35,7 +35,11 @@ GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "NOR-seiners") %>%   
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "NOR-trawlers") %>%      # For each class of gear
+GFW_trawlers <- brick("./Objects/GFW_ptrawlers.nc", varname = "NOR-strawlers") %>%      # For each class of gear
+  calc(mean, na.rm = T)%>%
+  projectRaster(crs = crs(Domains))
+
+GFW_trawlers <- brick("./Objects/GFW_strawlers.nc", varname = "NOR-ptrawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -69,11 +73,12 @@ IMR <- full_join(IMR, Unrepresented) %>%                                      # 
 
 habitat_weights <- rownames_to_column(IMR, var = "Feature") %>%               # Create a column to track each IMR region and gear combination
   st_intersection(habitats) %>%                                               # Crop the IMR region polygons to habitat types
-  mutate(GFW = case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, ., fun = "sum"), # Depending on gear type
-                         Gear_type == "seiners" ~ exact_extract(GFW_seiners, ., fun = "sum"),
-                         Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, ., fun = "sum"),
-                         Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, ., fun = "sum"),
-                         Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, ., fun = "sum")),            # From GFW by mobile and static gear
+  mutate(GFW = case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
+                         Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
+                         Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+                         Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
+                         Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
+                         Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")),            # From GFW by mobile and static gear
          Habitat = paste0(Shore, " ", Habitat)) %>%                           # Combine habitat labels
   group_by(Region, Aggregated_gear) %>%                                       # Per region and gear
   mutate(habitat_share = GFW / sum(GFW, na.rm = T)) %>%                       # Work out the proportion of activity in each piece split over habitats

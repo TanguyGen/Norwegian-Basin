@@ -45,10 +45,11 @@ Effort <- future_map(Files, ~ {
   data <- data %>%
     mutate(
       geartype = case_when(
-        geartype %in% c("pole_and_line", "set_longlines", "squid_jigger", "drifting_longlines", "set_gillnets") ~
+        geartype %in% c("pole_and_line", "set_longlines", "squid_jigger", "drifting_longlines", "set_gillnets","trollers") ~
           "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets",
         geartype == "pots_and_traps" ~ "pots_and_traps",
-        geartype %in% c("seiners", "trawlers") & within_pelagic ~ "Pelagic_trawlers & seines",
+        geartype == "trawlers" & within_pelagic ~ "Pelagic_trawlers",
+        geartype %in% c("seiners","purse_seines","other_seines","tuna_purse_seines","other_purse_seines")  ~ "Seiners",
         geartype == "trawlers" & within_shelf ~ "Shelf_trawlers",
         geartype == "dredge_fishing" ~ "dredge_fishing"
       )
@@ -68,12 +69,12 @@ setDT(Effort)                                                                 # 
 Effort <- Effort[, Year := year(as.Date(date))][                              # Extract year from date column
   , lapply(.SD, sum, na.rm = TRUE),                                           # Sum values
   by = .(lon_bin, lat_bin, flag, Year),                                       # By pixel, nation, gear, and year
-  .SDcols = c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","Pelagic_trawls & seines","Shelf_trawlers","dredge_fishing")] %>%                              # For each gear 
+  .SDcols = c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","Pelagic_trawlers","Seiners","Shelf_trawlers","dredge_fishing")] %>%                              # For each gear 
   as.data.frame()                                                             # Convert to data frame to play nicely with rasters
 
 #### Make rasters ####
 
-vars <- c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","Pelagic_trawls & seines","Shelf_trawlers","dredge_fishing")
+vars <- c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","Pelagic_trawlers","Seiners","Shelf_trawlers","dredge_fishing")
 
 tic()
 map( c("NOR","RUS","ISL","REST","EU+UK","FRO"), ~{                                               # For each flag
@@ -106,44 +107,52 @@ toc()
 
 #### Combine all files ####
 
-netcdfs_longlines <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*set_gillnets.nc", full.names = T) # Get a list of files to import 
-netcdfs_pots <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*pots_and_traps.nc", full.names = T) # Get a list of files to import 
-netcdfs_seiners <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Pelagic_trawls & seines.nc", full.names = T) # Get a list of files to import 
-netcdfs_trawlers <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Shelf_trawlers.nc", full.names = T)
-netcdfs_dredge_fishing <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*dredge_fishing.nc", full.names = T) # Get a list of files to import 
+netcdfs_Longlines <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*set_gillnets.nc", full.names = T) # Get a list of files to import 
+netcdfs_Pots <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*pots_and_traps.nc", full.names = T) # Get a list of files to import 
+netcdfs_PTrawlers <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Pelagic_trawlers.nc", full.names = T) # Get a list of files to import 
+netcdfs_STrawlers <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Shelf_trawlers.nc", full.names = T)
+netcdfs_Seiners <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Seiners.nc", full.names = T)
+netcdfs_Dredge_fishing <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*dredge_fishing.nc", full.names = T) # Get a list of files to import 
 
 
-file.rename(from=netcdfs_longlines[1],to="./Objects/GFW_longlines.nc")
-file.rename(from=netcdfs_pots[1],to="./Objects/GFW_pots.nc")
-file.rename(from=netcdfs_seiners[1],to="./Objects/GFW_seiners.nc")
-file.rename(from=netcdfs_trawlers[1],to="./Objects/GFW_trawlers.nc")
-file.rename(from=netcdfs_dredge_fishing[1],to="./Objects/GFW_dredge.nc")
+file.rename(from=netcdfs_Longlines[1],to="./Objects/GFW_longlines.nc")
+file.rename(from=netcdfs_Pots[1],to="./Objects/GFW_pots.nc")
+file.rename(from=netcdfs_PTrawlers[1],to="./Objects/GFW_ptrawlers.nc")
+file.rename(from=netcdfs_STrawlers[1],to="./Objects/GFW_strawlers.nc")
+file.rename(from=netcdfs_Seiners[1],to="./Objects/GFW_seiners.nc")
+file.rename(from=netcdfs_Dredge_fishing[1],to="./Objects/GFW_dredge.nc")
 
-walk(netcdfs_longlines[-1], ~{
+walk(netcdfs_Longlines[-1], ~{
   system(str_glue("ncks -A '{.x}' ./Objects/GFW_longlines.nc")) # In turn bind a variable to the main file
 })  #for windows
 
-walk(netcdfs_pots[-1], ~{
+walk(netcdfs_Pots[-1], ~{
   system(str_glue("ncks -A '{.x}' ./Objects/GFW_pots.nc")) # In turn bind a variable to the main file
 })  #for windows
 
-walk(netcdfs_seiners[-1], ~{
+walk(netcdfs_PTrawlers[-1], ~{
+  system(str_glue("ncks -A '{.x}' ./Objects/GFW_ptrawlers.nc")) # In turn bind a variable to the main file
+})  #for windows
+
+walk(netcdfs_STrawlers[-1], ~{
+  system(str_glue("ncks -A '{.x}' ./Objects/GFW_strawlers.nc")) # In turn bind a variable to the main file
+})  #for windows
+
+walk(netcdfs_Seiners[-1], ~{
   system(str_glue("ncks -A '{.x}' ./Objects/GFW_seiners.nc")) # In turn bind a variable to the main file
 })  #for windows
 
-walk(netcdfs_trawlers[-1], ~{
-  system(str_glue("ncks -A '{.x}' ./Objects/GFW_trawlers.nc")) # In turn bind a variable to the main file
-})  #for windows
-
-walk(netcdfs_dredge_fishing[-1], ~{
+walk(netcdfs_Dredge_fishing[-1], ~{
   system(str_glue("ncks -A '{.x}' ./Objects/GFW_dredge.nc")) # In turn bind a variable to the main file
 })  #for windows
 
-unlink(netcdfs_longlines[-1]) 
-unlink(netcdfs_trawlers[-1])  
-unlink(netcdfs_seiners[-1])  
-unlink(netcdfs_dredge_fishing[-1]) 
-unlink(netcdfs_pots[-1])  # Delete the redundant files
+
+unlink(netcdfs_Longlines[-1]) 
+unlink(netcdfs_STrawlers[-1])  
+unlink(netcdfs_PTrawlers[-1])  
+unlink(netcdfs_Seiners[-1])  
+unlink(netcdfs_Dredge_fishing[-1]) 
+unlink(netcdfs_Pots[-1])  # Delete the redundant files
 
 #### faster merges? ###
 

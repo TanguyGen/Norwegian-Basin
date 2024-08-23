@@ -6,7 +6,7 @@ rm(list=ls())                                                                 # 
 
 library(tidyverse)
 
-gears <- unique(read.csv2("./Data/MiMeMo gears.csv")$Aggregated_gear)          # Load fishing gear classifications
+gears <- unique(read.csv("./Data/MiMeMo gears.csv")$Aggregated_gear)          # Load fishing gear classifications
 
 guild <- unique(read.csv2("./Data/MiMeMo fish guilds.csv",check.names = FALSE)$Guild)              # Get guilds
 

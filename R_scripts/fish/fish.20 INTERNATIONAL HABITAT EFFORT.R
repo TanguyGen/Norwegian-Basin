@@ -33,7 +33,7 @@ Non_Russian_total <- (readRDS("./Objects/IMR absolute fishing effort.rds") +# Im
   readRDS("./Objects/EU absolute fishing effort.rds"))/                     # Import EU fishing effort
   365 * (60 * 60) / domain_size                                             # Convert to same units as international effort
 
-#### Get Russian effort only ####
+#### Get Russian + Faroe + Iceland effort only ####
 
 Russian_effort <- readRDS("./Objects/International effort by gear.rds") -   # Subtracting the above from
   Non_Russian_total                                                         # International effort gives us the Russian effort
@@ -63,8 +63,16 @@ Habitat_weights_seiners <- c("RUS-seiners") %>%
       mutate(Variable = .x)}) %>%                                           # Attach habitat metadata
   data.table::rbindlist() 
 
-Habitat_weights_trawlers <- c("RUS-trawlers") %>% 
-  future_map(~{ brick("./Objects/GFW_trawlers.nc", varname = .x) %>%                 # Import a brick of all years
+Habitat_weights_strawlers <- c("RUS-strawlers") %>% 
+  future_map(~{ brick("./Objects/GFW_strawlers.nc", varname = .x) %>%                 # Import a brick of all years
+      calc(mean, na.rm = T) %>% 
+      exact_extract(habitats, fun = "sum") %>%                              # Sum fishing hours within habitat types 
+      cbind(st_drop_geometry(habitats)) %>% 
+      mutate(Variable = .x)}) %>%                                           # Attach habitat metadata
+  data.table::rbindlist() 
+
+Habitat_weights_ptrawlers <- c("RUS-ptrawlers") %>% 
+  future_map(~{ brick("./Objects/GFW_ptrawlers.nc", varname = .x) %>%                 # Import a brick of all years
       calc(mean, na.rm = T) %>% 
       exact_extract(habitats, fun = "sum") %>%                              # Sum fishing hours within habitat types 
       cbind(st_drop_geometry(habitats)) %>% 
@@ -79,7 +87,7 @@ Habitat_weights_dredge <- c("RUS-dredge_fishing") %>%
       mutate(Variable = .x)}) %>%                                           # Attach habitat metadata
   data.table::rbindlist() 
 
-Habitat_weights<- data.table::rbindlist(list(Habitat_weights_longlines,Habitat_weights_pots,Habitat_weights_seiners,Habitat_weights_trawlers,Habitat_weights_dredge))%>% 
+Habitat_weights<- data.table::rbindlist(list(Habitat_weights_longlines,Habitat_weights_pots,Habitat_weights_seiners,Habitat_weights_ptrawlers,Habitat_weights_strawlers,Habitat_weights_dredge))%>% 
   separate(Variable, into = c(NA, "Gear_type", NA), sep = "-") %>%          # Split variable name into flag and gear type
   group_by(Gear_type) %>% 
   transmute(Proportion = ifelse(sum(`.`) == 0, 0, `.`/sum(`.`)),                                      # Calculate the proportion of fishing effort in each row

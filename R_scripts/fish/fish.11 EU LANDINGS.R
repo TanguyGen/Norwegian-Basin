@@ -24,7 +24,7 @@ Region_mask<-Region_mask%>%
 
   # reproject to match EU data
 
-gear <- read.csv2("./Data/MiMeMo gears.csv")                                   # Load fishing gear classifications
+gear <- read.csv("./Data/MiMeMo gears.csv")                                   # Load fishing gear classifications
 
 guild <- read.csv2("./Data/MiMeMo fish guilds.csv") %>%                        # Get guilds for FAO codes
   dplyr::select(FAO, Guild) %>% 
@@ -44,11 +44,15 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "EU+UK-pots_and_traps") %>%
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-Pelagic_trawls & seines") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-Seiners") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "EU+UK-Shelf_trawlers") %>%      # For each class of gear
+GFW_strawlers <- brick("./Objects/GFW_strawlers.nc", varname = "EU+UK-Shelf_trawlers") %>%      # For each class of gear
+  calc(mean, na.rm = T)%>%
+  projectRaster(crs = crs(Domains))
+
+GFW_ptrawlers <- brick("./Objects/GFW_ptrawlers.nc", varname = "EU+UK-Pelagic_trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -67,12 +71,15 @@ EU_landings <- str_glue("./Data/EU_fish/spatial_landings_{2015:2018}/") %>%   # 
             .progress = T) %>%                                                # ttvllnd is "total value landed"
   bind_rows() %>% 
   rename(Gear_code = ger_typ)
+tic()
 EU_Arctic <- st_contains(Region_mask, EU_landings, sparse = F)  %>% # Which EU polygons are in the model mask? 
   t() %>%                                                                     # Transpose to indicate row not columns
   EU_landings[.,] %>%                                                         # Subset the Eu data spatially
   rownames_to_column(var = "EU_polygon") %>% 
   left_join(gear) %>%                                                         # Attach gear classifications
-  left_join(guild)                                                            # Attach guild classifications
+  left_join(guild)     
+toc()
+#Attach guild classifications
   
 #### Scale EU landings by the proportion of fishing effort according to GFW in the model domain ####
 
@@ -82,18 +89,20 @@ on.exit(options(oopts))
 weights <- dplyr::select(EU_Arctic, EU_polygon, Gear_type) %>%                # Limit to information needed to calculate the proportion of fishing effort in the model domain
   split(f = as.factor(as.numeric(.$EU_polygon))) %>%# Isolate each shape for fast parallel processing
   future_map( ~{                                                              # In parallel
-    mutate(.x, total=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
-                         Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
-                         Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
-                         Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
-                         Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>%                        # If this is a mobile gear) 
+    mutate(.x, total=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
+                               Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
+                               Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+                               Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
+                               Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
+                               Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>%                        # If this is a mobile gear) 
     # This is the total effort to scale features to within a polygon
     st_intersection(Domains) %>%     # Crop the polygons to the model domain
-    mutate(feature=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
-                     Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
-                     Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
-                     Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
-                     Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum"))) %>%  
+    mutate(feature=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
+                             Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
+                             Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+                             Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
+                             Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
+                             Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum"))) %>%  
     st_drop_geometry()}, .progress = T) %>%                                   # Drop geometry for a non-spatial join
   data.table::rbindlist() %>%                                                 # Bind into a dataframe
   mutate(GFW_Scale = feature/total) %>%                                       # Get the proportion of effort per polygon in the domain

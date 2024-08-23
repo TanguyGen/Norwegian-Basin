@@ -43,20 +43,33 @@ Proportion_effort_pots_and_traps <- c(
   rbindlist()
 
 Proportion_effort_seiners <- c(
-  "NOR-Pelagic_trawls & seines",
-  "FRO-Pelagic_trawls & seines",
-  "ISL-Pelagic_trawls & seines",
-  "RUS-Pelagic_trawls & seines",
-  "EU+UK-Pelagic_trawls & seines",
-  "REST-Pelagic_trawls & seines"
+  "NOR-Seiners",
+  "FRO-Seiners",
+  "ISL-Seiners",
+  "RUS-Seiners",
+  "EU+UK-Seiners",
+  "REST-Seiners"
 )%>%
   future_map(~{ brick("./Objects/GFW_seiners.nc", varname = .x) %>%                   # Import a brick of all years
       exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 
       mutate(Variable = .x) %>%                                            # Attach the variable name to keep track
       cbind(sf::st_drop_geometry(habitats))})%>%
   rbindlist()
+Proportion_effort_ptrawlers <- c(
+  "NOR-Pelagic_trawlers",
+  "FRO-Pelagic_trawlers",
+  "ISL-Pelagic_trawlers",
+  "RUS-Pelagic_trawlers",
+  "EU+UK-Pelagic_trawlers",
+  "REST-Pelagic_trawlers"
+)%>%
+  future_map(~{ brick("./Objects/GFW_trawlers.nc", varname = .x) %>%                   # Import a brick of all years
+      exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 
+      mutate(Variable = .x) %>%                                            # Attach the variable name to keep track
+      cbind(sf::st_drop_geometry(habitats))})%>%
+  rbindlist()
 
-Proportion_effort_trawlers <- c(
+Proportion_effort_strawlers <- c(
   "NOR-Shelf_trawlers",
   "FRO-Shelf_trawlers",
   "ISL-Shelf_trawlers",
@@ -86,7 +99,7 @@ Proportion_effort_dredge <-c(
 
 gear <- read.csv2("./Data/MiMeMo gears.csv")   
 
-Proportion_effort<-data.table::rbindlist(list(Proportion_effort_pole_and_line,Proportion_effort_pots_and_traps,Proportion_effort_seiners,Proportion_effort_trawlers,Proportion_effort_dredge)) %>% 
+Proportion_effort<-data.table::rbindlist(list(Proportion_effort_pole_and_line,Proportion_effort_pots_and_traps,Proportion_effort_seiners,Proportion_effort_strawlers,Proportion_effort_ptrawlers,Proportion_effort_dredge)) %>% 
   pivot_longer(starts_with("sum"), names_to = "Year", values_to = "Hours") %>%# Reshape so all years are in a column
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-") %>%# Split variable name into flag and gear type
   left_join(gear)%>%
