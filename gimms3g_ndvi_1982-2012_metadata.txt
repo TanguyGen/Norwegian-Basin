@@ -1,0 +1,42 @@
+File ./Objects/GFW.nc (NC_FORMAT_CLASSIC):
+
+     2 variables (excluding dimension variables):
+        int crs[]   
+            proj4: +proj=longlat +datum=WGS84 +no_defs
+        float EU_dredge_fishing[Longitude,Latitude,Year]   
+            units: Hours
+            _FillValue: -3.39999995214436e+38
+            grid_mapping: crs
+            proj4: +proj=longlat +datum=WGS84 +no_defs
+            min: 0
+             min: 0
+             min: 0
+             min: 0
+             min: 0
+             min: 0
+             min: 0
+             min: 0
+            max: 0
+             max: 1.02219998836517
+             max: 0
+             max: 0
+             max: 0
+             max: 0
+             max: 0
+             max: 14.6140003204346
+
+     3 dimensions:
+        Longitude  Size:10000 
+            units: degrees_east
+            long_name: Longitude
+        Latitude  Size:2000 
+            units: degrees_north
+            long_name: Latitude
+        Year  Size:8   *** is unlimited *** 
+            units: unknown
+            long_name: Year
+
+    3 global attributes:
+        Conventions: CF-1.4
+        created_by: R, packages ncdf4 and raster (version 3.6-26)
+        date: 2024-04-10 04:29:02
