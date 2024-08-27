@@ -10,7 +10,7 @@ Shelf_Trawlers,Mid-water pair trawl,Shelf_trawlers,PTM,,
 Shelf_Trawlers,Otter twin trawls,Shelf_trawlers,OTT,,Bottom trawl: otter trawl
 Pelagic_Trawlers,Mid-water otter trawl,Pelagic_trawlers,OTM,,Pelagic trawl: otter trawl
 Pelagic_Trawlers,Pelagic trawl,Pelagic_trawlers,53,Pelagic trawl,
-Pelagic_Trawlers,,Pelagic_trawlers,,,Pelagic trawl: pair trawl
+Pelagic_Trawlers,,Pelagic_trawlers,53,,Pelagic trawl: pair trawl
 Seiners,Purse seine,Seiners,11,Purse seine,
 Pelagic_Trawlers,Pelagic trawl (pair),Pelagic_trawlers,54,,
 Longlines_and_Gillnets,Undefined hook gear,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,30,,
