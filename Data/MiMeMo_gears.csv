@@ -1,42 +1,42 @@
-Aggregated_gear,Gear_name,Gear_type,Gear_code,Fishing gear,fishing gear
-Shelf_Trawlers,Undefined trawl,Shelf_trawlers,50,,
-Shelf_Trawlers,Double trawl,Shelf_trawlers,58,,Bottom trawl: double trawl
-Shelf_Trawlers,Triple trawl,Shelf_trawlers,59,,
-Shelf_Trawlers,Beam trawl,Shelf_trawlers,56,,
-Shelf_Trawlers,Bottom trawl,Shelf_trawlers,51,Bottom trawl,
-Shelf_Trawlers,Bottom otter trawl,Shelf_trawlers,OTB,,
-Shelf_Trawlers,Bottom pair trawl,Shelf_trawlers,PTB,,Bottom trawl: pair trawling
-Shelf_Trawlers,Mid-water pair trawl,Shelf_trawlers,PTM,,
-Shelf_Trawlers,Otter twin trawls,Shelf_trawlers,OTT,,Bottom trawl: otter trawl
-Pelagic_Trawlers,Mid-water otter trawl,Pelagic_trawlers,OTM,,Pelagic trawl: otter trawl
-Pelagic_Trawlers,Pelagic trawl,Pelagic_trawlers,53,Pelagic trawl,
-Pelagic_Trawlers,,Pelagic_trawlers,53,,Pelagic trawl: pair trawl
-Seiners,Purse seine,Seiners,11,Purse seine,
-Pelagic_Trawlers,Pelagic trawl (pair),Pelagic_trawlers,54,,
-Longlines_and_Gillnets,Undefined hook gear,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,30,,
-Longlines_and_Gillnets,Other hook and line,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,32,,Long line: hand line
-Longlines_and_Gillnets,Floating hooks,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,31,Handline,Long line: drifting
-Longlines_and_Gillnets,Jigging,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,33,,Jigging line: automatic
-Longlines_and_Gillnets,Jigging,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,33,,Jigging line: manual
-Longlines_and_Gillnets,,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,,Bottom longline,Long line: demersal
-Longlines_and_Gillnets,Undefined net,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,20,,
-Longlines_and_Gillnets,Gillnet (static),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,22,Bottom gillnet,Gill net: demersal
-Longlines_and_Gillnets,Gillnet (drifting),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,21,,Gill net: drifting
-Seiners,Undefined seine net ,Seiners,10,,
-Seiners,Danish seine,Seiners,61,Danish seine,Danish seine
-Seiners,,Seiners,,,Seine: single ship
-Seiners,,Seiners,,,Seine: ring net
-Seiners,,Seiners,,,Seine: two ships
-Pots,Pot,pots_and_traps,42,,
-Pots,Pots,pots_and_traps,FPO,,
-Pots,,pots_and_traps,41,Whelk trap,Traps
-Dropped,Other,,80,,
-Dropped,Unkown,,NK,,
-Harpoons,Harpoon and similar unspecified types,,70,,
-Kelp harvesting,Kelp harvesting,,Seaweed,,
-Dredging,Dredge,dredge_fishing,81,,
-Dredging,,dredge_fishing,81,Shellfish dredge,
-Dredging,,dredge_fishing,81,Scallop dredge,Scallop dredge
-Shelf_Trawlers,Shrimp trawl,Shelf_trawlers,55,Shrimp trawl,Bottom trawl: prawn
-Shelf_Trawlers,,Shelf_trawlers,,Neophrops trawl,
-Recreational,Recreational,,DUMMY,,
+Aggregated_gear,Gear_name,Gear_type,Gear_code,Fishing gear,fishing gear,geargroup
+Shelf_Trawlers,Undefined trawl,Shelf_trawlers,50,,,trawl
+Shelf_Trawlers,Double trawl,Shelf_trawlers,58,,Bottom trawl: double trawl,trawl
+Shelf_Trawlers,Triple trawl,Shelf_trawlers,59,,,trawl
+Shelf_Trawlers,Beam trawl,Shelf_trawlers,56,,,trawl
+Shelf_Trawlers,Bottom trawl,Shelf_trawlers,51,Bottom trawl,,trawl
+Shelf_Trawlers,Bottom otter trawl,Shelf_trawlers,OTB,,,trawl
+Shelf_Trawlers,Bottom pair trawl,Shelf_trawlers,PTB,,Bottom trawl: pair trawling,trawl
+Shelf_Trawlers,Mid-water pair trawl,Shelf_trawlers,PTM,,,trawl
+Shelf_Trawlers,Otter twin trawls,Shelf_trawlers,OTT,,Bottom trawl: otter trawl,
+Pelagic_Trawlers,Mid-water otter trawl,Pelagic_trawlers,OTM,,Pelagic trawl: otter trawl,
+Pelagic_Trawlers,Pelagic trawl,Pelagic_trawlers,53,Pelagic trawl,,
+Pelagic_Trawlers,,Pelagic_trawlers,53,,Pelagic trawl: pair trawl,
+Seiners,Purse seine,Seiners,11,Purse seine,,
+Pelagic_Trawlers,Pelagic trawl (pair),Pelagic_trawlers,54,,,
+Longlines_and_Gillnets,Undefined hook gear,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,30,,,
+Longlines_and_Gillnets,Other hook and line,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,32,,Long line: hand line,line
+Longlines_and_Gillnets,Floating hooks,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,31,Handline,Long line: drifting,line
+Longlines_and_Gillnets,Jigging,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,33,,Jigging line: automatic,line
+Longlines_and_Gillnets,Jigging,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,33,,Jigging line: manual,line
+Longlines_and_Gillnets,,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,,Bottom longline,Long line: demersal,line
+Longlines_and_Gillnets,Undefined net,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,20,,,line
+Longlines_and_Gillnets,Gillnet (static),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,22,Bottom gillnet,Gill net: demersal,
+Longlines_and_Gillnets,Gillnet (drifting),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,21,,Gill net: drifting,
+Seiners,Undefined seine net ,Seiners,10,,,
+Seiners,Danish seine,Seiners,61,Danish seine,Danish seine,
+Seiners,,Seiners,,,Seine: single ship,
+Seiners,,Seiners,,,Seine: ring net,
+Seiners,,Seiners,,,Seine: two ships,
+Pots,Pot,pots_and_traps,42,,,
+Pots,Pots,pots_and_traps,FPO,,,
+Pots,,pots_and_traps,41,Whelk trap,Traps,
+Dropped,Other,,80,,,
+Dropped,Unkown,,NK,,,
+Harpoons,Harpoon and similar unspecified types,,70,,,
+Kelp harvesting,Kelp harvesting,,Seaweed,,,
+Dredging,Dredge,dredge_fishing,81,,,
+Dredging,,dredge_fishing,81,Shellfish dredge,,
+Dredging,,dredge_fishing,81,Scallop dredge,Scallop dredge,
+Shelf_Trawlers,Shrimp trawl,Shelf_trawlers,55,Shrimp trawl,Bottom trawl: prawn,trawl
+Shelf_Trawlers,,Shelf_trawlers,,Neophrops trawl,,trawl
+Recreational,Recreational,,DUMMY,,,
