@@ -11,7 +11,9 @@ Domains <- st_transform(readRDS("./Objects/Domains.rds"), crs = 4326) %>%
   st_as_sf() %>% 
   mutate(Keep = T)
 
-gear <- read.csv("./Data/MiMeMo_gears.csv", check.names = FALSE) # Import gear names
+gear <- read.csv("./Data/MiMeMo_gears.csv", check.names = FALSE)%>% # Import gear names
+  dplyr::select(Aggregated_gear, Gear_ISL,Gear_FRO) 
+
 
 #################### For Iceland
 
@@ -29,7 +31,7 @@ landings_target <- expand.grid(Guild = unique(guild$Guild), # reintroduces guild
                                Year = 2010:2019) # Get combinations of gear, guild, and year to reintroduce unrepresented levels
 Iceland_landings <- read.csv2("./Data/Iceland_Faroe/Iceland_landings.csv",check.names = FALSE)%>%
   mutate(across(everything(), ~ifelse(. == "..", NA, .)))%>%  #Change empty boxes  written with a "." by NAs
-  setNames(c("Species","Fishing gear","Fishing.area","Unit","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019"))%>%
+  setNames(c("Species","Gear_ISL","Fishing.area","Unit","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019"))%>%
   pivot_longer(cols = `2010`:`2019`,names_to = "Year",values_to = "Tonnes")%>%
   left_join(gear)%>%
   left_join(guild)%>%
@@ -69,11 +71,12 @@ landings_target_fro <- expand.grid(Guild = unique(guild$Guild), # reintroduces g
 Faroe_landings <- read.csv2("./Data/Iceland_Faroe/Faroe_landings.csv", check.names = FALSE)%>%
   pivot_longer(cols = matches("^\\d{4}"), names_to = "Year_Month", values_to = "Tonnes") %>%
   mutate(across(Tonnes, ~ifelse(. == "-", NA, .)))%>% #Change empty boxes written with a "-" by NAs
-  mutate(Tonnes=as.numeric(Tonnes))%>%
+  mutate(Tonnes=as.numeric(Tonnes),
+         Gear_FRO=`fishing gear`)%>%
   separate(Year_Month, into = c("Year", "Month"), sep = " ", convert = TRUE)%>%
-  group_by(Year,species,`fishing gear`) %>%
+  group_by(Year,species,Gear_FRO) %>%
   mutate(Tonnes = sum(Tonnes, na.rm = TRUE))%>%
-  dplyr::select(species,`fishing gear`,Year,Tonnes)%>%
+  dplyr::select(species,Gear_FRO,Year,Tonnes)%>%
   unique()%>%
   left_join(gear)%>%
   left_join(guild)%>%

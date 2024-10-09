@@ -146,9 +146,9 @@ Inflation<-rbind(Inflation_pole_and_line,Inflation_pots_and_traps,Inflation_sein
 
 ####  Scale to international effort ####
 
-International <- (EU + IMR) * Inflation + Dredge                                                     
+International <- (EU + IMR+ Dredge) * Inflation                                                      
 
-International["Recreational"] <- 1256616  # Hours from Mike's stories
+International["Recreational"] <- 2363693.491  # Hours from Mike's stories
 
 transformed_International <- (International / 365) *                        # Convert to daily effort
                              (60 * 60) /                                    # in seconds (from hours) 
