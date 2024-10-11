@@ -44,7 +44,7 @@ Fish<-1:nrow(stock)%>%
     getSAG(stock=stock$FishStock[.x],year = 2010:2019)%>%
       mutate(Guild=stock$Guild[.x])%>%
       filter(Year %in% 2010:2019,
-           stockSizeDescription=="SSB"&units=="tonnes")%>%
+           stockSizeDescription=="SSB"|stockSizeDescription=="Biomass index"&units=="tonnes")%>%
       drop_na(SSB)%>%
       group_by(Year,Guild)%>%
       summarise(SSB=sum(SSB,na.rm = T),catches=sum(catches,na.rm=T))%>%
@@ -79,6 +79,8 @@ Biomass_cetaceans<-sum(Minke, Fin, Humpback, Sperm, Killer, Porpoise, White_side
 Harbour_seal<-(634+1200+170+1549)*95
 Grey_seal<-6496*134
 Seals_biomass<-Grey_seal+Harbour_seal
+
+
 
 #Biomass benthos
 
@@ -185,11 +187,12 @@ Total_biomass<-Fish%>%
 Total_biomass["Cetacean"]<-Biomass_cetaceans
 Total_biomass["Birds"]<-3800 #(Barrett, 2002)
 Total_biomass["Pinnipeds"]<-Seals_biomass
+Total_biomass["Zooplankton carnivore"]<-2.5*st_area(st_union(domain))*10^-6 #(Skjodal, 2004)
 
 
 discard_rate <- readRDS("./Objects/Discard rates.rds")
 
-bycatch<-readRDS("./Objects/Bycatch weight.rds")*st_area(domain)*360*10^-6 # tonnes/year
+bycatch<-readRDS("./Objects/Bycatch weight.rds")*st_area(st_union(domain))*360*10^-6 # tonnes/year
 
 landings <- readRDS("./Objects/International landings.rds") *st_area(st_union(domain)) # Units tonnes/year
 
@@ -201,6 +204,9 @@ catch[!is.finite(catch)] <- landings[!is.finite(catch)]                     # 0s
 catch<-catch+bycatch
 
 guild_catch<-colSums(catch)
+
+Total_biomass["Demersal"]<-Total_biomass["Demersal (quota limited)"]+Total_biomass["Demersal (non quota)"]
+guild_catch["Demersal"]<-guild_catch["Demersal (quota limited)"]+guild_catch["Demersal (non quota)"]
 
 Harvest_ratios<-guild_catch/Total_biomass
 
