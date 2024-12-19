@@ -37,7 +37,6 @@ stock<-2010:2019%>%
   rbindlist()
   
 
-test<-getSAG(stock=stock$FishStock[1],year = 2010:2019)
 
 Fish<-1:nrow(stock)%>%
   future_map(~{
@@ -111,7 +110,7 @@ Biomass_benthos<- Biomass_beamtrawl%>%
   ungroup()%>%
   left_join(guild)%>%
   group_by(Guild)%>%
-  summarise(Biomass=mean(measurementValue/100,na.rm=T))%>%
+  summarise(Biomass=mean(measurementValue/100,na.rm=T))%>% #
   mutate(total_known_biomass = sum(Biomass[!is.na(Guild)]),      # Total biomass of known species
          Inflation=(total_known_biomass + Biomass[is.na(Guild)]) / total_known_biomass,
          Biomass=Biomass*Inflation)%>%
@@ -136,7 +135,7 @@ Abundance_benthos<- Abundance_beamtrawl%>%
   ungroup()%>%
   left_join(guild)%>%
   group_by(Guild)%>%
-  summarise(Abundance=mean(measurementValue/100,na.rm=T))%>%
+  summarise(Abundance=mean(measurementValue*100,na.rm=T))%>%
   mutate(total_known_abundance = sum(Abundance[!is.na(Guild)]),      # Total biomass of known species
          Inflation=(total_known_abundance + Abundance[is.na(Guild)]) / total_known_abundance,
          Abundance=Abundance*Inflation)%>%

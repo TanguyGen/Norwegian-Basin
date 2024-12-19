@@ -23,6 +23,8 @@ Regions <- sf::read_sf(dsn="./Data/IMR/Regions/") %>%                      # Imp
   dplyr::select(Region = havomr) %>%                                          # Select and rename region column
   unique()                                                            # Keep unique shapes
 
+Regions<-st_transform(Regions,crs=st_crs(Domains))
+
 GFW_longlines <- brick("./Objects/GFW_longlines.nc", varname = "NOR-pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets") %>%      # Get mean fishing effort across years from Global fishing watch
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
@@ -55,6 +57,9 @@ IMR <- data.table::fread("./Data/IMR/logbookNOR_00to20_b.lst", sep = ';',     # 
   left_join(gear) %>%                                                         # Attach labels
   filter(Aggregated_gear != "Dropped", Region %in% Regions$Region,            # Limit to regions and gears of interest
          between(Year, 2011, 2019))   
+
+IMR<-IMR%>%
+  filter(!Region %in% c(28,42) )
 
 Unrepresented <- expand.grid(Aggregated_gear = unique(IMR$Aggregated_gear),   # Averages were being inflated because years with 0 effort in gears
                              Gear_type = unique(IMR$Gear_type),               # Aren't represented. 
