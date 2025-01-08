@@ -6,13 +6,13 @@
 # Wipe environment and load required data
 rm(list = ls())
 
-packages <- c("data.table","tidyr","purrr", "furrr", "future", "tictoc", "raster", "sf","progressr","tictoc","dplyr","tibble","exactextractr")
+packages <- c("data.table","tidyr","purrr", "furrr", "future", "tictoc", "raster", "sf","progressr","dplyr","tibble","exactextractr")
 lapply(packages, library, character.only = TRUE)
 
 
 gear <- read.csv("./Data/MiMeMo_gears.csv")                     # Limit to FAO system
   
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv")
+guild <- read.csv("./Data/MiMeMo fish guilds.csv")
 
 Domains <- st_transform(readRDS("./Objects/Domains.rds"), crs = 4326) %>%
   st_as_sf() %>%

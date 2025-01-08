@@ -12,7 +12,7 @@ Domains <- st_transform(readRDS("./Objects/Domains.rds"), crs = 4326) %>%     # 
 
 gear <- read.csv("./Data/MiMeMo_gears.csv",check.names = F)                                   # Import gear names
 
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv",check.names = F) %>%                        # Import guild names
+guild <- read.csv("./Data/MiMeMo fish guilds.csv",check.names = F) %>%                        # Import guild names
   dplyr::select(Guild, `IMR code`) %>%                                          # Limit to IMR system
   drop_na() %>%                                                               # Drop those without an IMR code
   distinct() %>%                                                              # Drop duplicated rows which hang around after ditching other systems
@@ -33,15 +33,11 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "NOR-pots_and_traps") %>%  
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "NOR-Seiners") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "NOR-seiners") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_strawlers <- brick("./Objects/GFW_strawlers.nc", varname = "NOR-Shelf_trawlers") %>%      # For each class of gear
-  calc(mean, na.rm = T)%>%
-  projectRaster(crs = crs(Domains))
-
-GFW_ptrawlers <- brick("./Objects/GFW_ptrawlers.nc", varname = "NOR-Pelagic_trawlers") %>%      # For each class of gear
+GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "NOR-trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -84,8 +80,7 @@ Regions_GFW <- Regions %>%
   mutate(longlines_total = exact_extract(GFW_longlines, ., fun = "sum"),            # Get all longlines fishing effort from GFW in an IMR region
          pots_total = exact_extract(GFW_pots, ., fun = "sum"),
          seiners_total = exact_extract(GFW_seiners, ., fun = "sum"),
-         ptrawlers_total = exact_extract(GFW_ptrawlers, ., fun = "sum"),
-         strawlers_total = exact_extract(GFW_strawlers, ., fun = "sum"),
+         trawlers_total = exact_extract(GFW_trawlers, ., fun = "sum"),
          dredge_total = exact_extract(GFW_dredge, ., fun = "sum"),) %>%        # This is the total effort to scale features to within a polygon
   st_drop_geometry()                                                          # Drop geometry for a non-spatial join
 
@@ -95,15 +90,13 @@ corrected_IMR <- rownames_to_column(IMR, var = "Feature") %>%  # Create a column
   mutate(longlines_feature = exact_extract(GFW_longlines, ., fun = "sum"),          # Get the GFW fishing effort in each shape
          pots_feature = exact_extract(GFW_pots, ., fun = "sum"),
          seiners_feature = exact_extract(GFW_seiners, ., fun = "sum"),
-         ptrawlers_feature = exact_extract(GFW_ptrawlers, ., fun = "sum"),
-         strawlers_feature = exact_extract(GFW_strawlers, ., fun = "sum"),
+         trawlers_feature = exact_extract(GFW_trawlers, ., fun = "sum"),
          dredge_feature = exact_extract(GFW_dredge, ., fun = "sum")) %>%      # Depending on gear type
   left_join(Regions_GFW) %>%                                                  # Attach total GFW effort by IMR region
   mutate(
     GFW_Scale = case_when(
-      Gear_type == "Shelf_trawlers" ~ (strawlers_feature) / strawlers_total, # Depending on gear type
       Gear_type == "Seiners" ~ (seiners_feature) /seiners_total,
-      Gear_type == "Pelagic_trawlers" ~ (ptrawlers_feature) /ptrawlers_total,
+      Gear_type == "trawlers" ~ (trawlers_feature) /trawlers_total,
       Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ (longlines_feature) / longlines_total,
       Gear_type == "pots_and_traps" ~ (pots_feature) / pots_total,
       Gear_type == "dredge_fishing" ~ (dredge_feature) / dredge_total)) %>%   # Get proportion of GFW effort from a region within a feature
@@ -114,10 +107,12 @@ corrected_IMR <- rownames_to_column(IMR, var = "Feature") %>%  # Create a column
 saveRDS(corrected_IMR, "./Objects/IMR regional absolute effort and landings.rds")
 
 #### Convert IMR landings to a matrix by guild and gear ####
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv")
+guild <- read.csv("./Data/MiMeMo fish guilds.csv")
 
-landings_target <- expand.grid(Guild = unique(guild$Guild), # Forces birds and pinnipeds back in 
-                      Aggregated_gear = unique(gear$Aggregated_gear) )      # Get combinations of gear and guild
+# Expand grid with all combinations of Guild and Aggregated_gear
+landings_target <- expand.grid(Guild = unique(guild$Guild), 
+                               Aggregated_gear = unique(gear$Aggregated_gear))
+
 
 landings <- st_drop_geometry(corrected_IMR) %>% 
   group_by(Aggregated_gear, Guild) %>% 
@@ -139,9 +134,10 @@ heatmap(landings)
 
 effort_target <- dplyr::select(gear, Aggregated_gear) %>%                     # Select gear names
   distinct() %>%                                                              # Drop duplicates
-  filter(Aggregated_gear != "Dropped")                                        # Drop unused gears
-  
-effort <- st_drop_geometry(corrected_IMR) %>%                                 # Remove geometries
+  filter(Aggregated_gear != "Dropped")   
+
+
+effort <- st_drop_geometry(corrected_IMR) %>%   
   group_by(Aggregated_gear) %>%                                               # By gear
   summarise(Hours = sum(corrected_effort, na.rm = T)) %>%                     # Total fishing effort
   right_join(effort_target) %>%                                               # Reintroduce unobserved gears
@@ -151,6 +147,7 @@ effort <- st_drop_geometry(corrected_IMR) %>%                                 # 
   .[order(row.names(.)),]                                                     # Alphabetise rows to ensure a match with other objects
 
 saveRDS(effort, "./Objects/IMR absolute fishing effort.rds")                  # Save
+#IMReffort<-readRDS("./Objects/IMR absolute fishing effort.rds")
 #### visual checks ####
 
 # library(ggnewscale)

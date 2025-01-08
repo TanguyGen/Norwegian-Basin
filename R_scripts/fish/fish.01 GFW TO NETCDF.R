@@ -32,14 +32,9 @@ Effort <- future_map(Files, ~ {
     mutate(
       lat_bin = cell_ll_lat,
       lon_bin = cell_ll_lon,
-      point = st_sfc(map2(lon_bin, lat_bin, ~ st_point(c(.x, .y))), crs = 4326),
       flag = ifelse(flag %in% EU | flag == "GBR", "EU+UK", flag),
       flag = ifelse(!flag %in% c("NOR", "FRO", "RUS", "ISL", "EU+UK"), "REST", flag)
     )
-  
-  # Precompute st_within for the points and both domains
-  within_pelagic <- st_within(data$point, Domains[1,], sparse = FALSE)[, 1]
-  within_shelf <- st_within(data$point, Domains[2,], sparse = FALSE)[, 1]
   
   # Update geartype based on st_within results
   data <- data %>%
@@ -48,9 +43,8 @@ Effort <- future_map(Files, ~ {
         geartype %in% c("pole_and_line", "set_longlines", "squid_jigger", "drifting_longlines", "set_gillnets","trollers") ~
           "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets",
         geartype == "pots_and_traps" ~ "pots_and_traps",
-        geartype == "trawlers" & within_pelagic ~ "Pelagic_trawlers",
-        geartype %in% c("seiners","purse_seines","other_seines","tuna_purse_seines","other_purse_seines")  ~ "Seiners",
-        geartype == "trawlers" & within_shelf ~ "Shelf_trawlers",
+        geartype == "trawlers" ~ "trawlers",
+        geartype %in% c("seiners","purse_seines","other_seines","tuna_purse_seines","other_purse_seines")  ~ "seiners",
         geartype == "dredge_fishing" ~ "dredge_fishing"
       )
     ) %>%
@@ -69,12 +63,12 @@ setDT(Effort)                                                                 # 
 Effort <- Effort[, Year := year(as.Date(date))][                              # Extract year from date column
   , lapply(.SD, sum, na.rm = TRUE),                                           # Sum values
   by = .(lon_bin, lat_bin, flag, Year),                                       # By pixel, nation, gear, and year
-  .SDcols = c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","Pelagic_trawlers","Seiners","Shelf_trawlers","dredge_fishing")] %>%                              # For each gear 
+  .SDcols = c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","trawlers","seiners","dredge_fishing")] %>%                              # For each gear 
   as.data.frame()                                                             # Convert to data frame to play nicely with rasters
 
 #### Make rasters ####
 
-vars <- c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","Pelagic_trawlers","Seiners","Shelf_trawlers","dredge_fishing")
+vars <- c("pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets","pots_and_traps","trawlers","seiners","dredge_fishing")
 
 tic()
 map( c("NOR","RUS","ISL","REST","EU+UK","FRO"), ~{                                               # For each flag
@@ -109,16 +103,14 @@ toc()
 
 netcdfs_Longlines <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*set_gillnets.nc", full.names = T) # Get a list of files to import 
 netcdfs_Pots <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*pots_and_traps.nc", full.names = T) # Get a list of files to import 
-netcdfs_PTrawlers <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Pelagic_trawlers.nc", full.names = T) # Get a list of files to import 
-netcdfs_STrawlers <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Shelf_trawlers.nc", full.names = T)
-netcdfs_Seiners <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*Seiners.nc", full.names = T)
+netcdfs_Trawlers <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*trawlers.nc", full.names = T) # Get a list of files to import 
+netcdfs_Seiners <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*seiners.nc", full.names = T)
 netcdfs_Dredge_fishing <- list.files(path = "./Data/GFW_daily_csvs", pattern ="*dredge_fishing.nc", full.names = T) # Get a list of files to import 
 
 
 file.rename(from=netcdfs_Longlines[1],to="./Objects/GFW_longlines.nc")
 file.rename(from=netcdfs_Pots[1],to="./Objects/GFW_pots.nc")
-file.rename(from=netcdfs_PTrawlers[1],to="./Objects/GFW_ptrawlers.nc")
-file.rename(from=netcdfs_STrawlers[1],to="./Objects/GFW_strawlers.nc")
+file.rename(from=netcdfs_Trawlers[1],to="./Objects/GFW_trawlers.nc")
 file.rename(from=netcdfs_Seiners[1],to="./Objects/GFW_seiners.nc")
 file.rename(from=netcdfs_Dredge_fishing[1],to="./Objects/GFW_dredge.nc")
 
@@ -130,12 +122,8 @@ walk(netcdfs_Pots[-1], ~{
   system(str_glue("ncks -A '{.x}' ./Objects/GFW_pots.nc")) # In turn bind a variable to the main file
 })  #for windows
 
-walk(netcdfs_PTrawlers[-1], ~{
-  system(str_glue("ncks -A '{.x}' ./Objects/GFW_ptrawlers.nc")) # In turn bind a variable to the main file
-})  #for windows
-
-walk(netcdfs_STrawlers[-1], ~{
-  system(str_glue("ncks -A '{.x}' ./Objects/GFW_strawlers.nc")) # In turn bind a variable to the main file
+walk(netcdfs_Trawlers[-1], ~{
+  system(str_glue("ncks -A '{.x}' ./Objects/GFW_trawlers.nc")) # In turn bind a variable to the main file
 })  #for windows
 
 walk(netcdfs_Seiners[-1], ~{
@@ -148,8 +136,7 @@ walk(netcdfs_Dredge_fishing[-1], ~{
 
 
 unlink(netcdfs_Longlines[-1]) 
-unlink(netcdfs_STrawlers[-1])  
-unlink(netcdfs_PTrawlers[-1])  
+unlink(netcdfs_Trawlers[-1])  
 unlink(netcdfs_Seiners[-1])  
 unlink(netcdfs_Dredge_fishing[-1]) 
 unlink(netcdfs_Pots[-1])  # Delete the redundant files

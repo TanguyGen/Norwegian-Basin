@@ -65,12 +65,12 @@ Inflation_pots_and_traps <- c(
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-")
 
 Inflation_seiners <- c(
-  "NOR-Seiners",
-  "FRO-Seiners",
-  "ISL-Seiners",
-  "RUS-Seiners",
-  "EU+UK-Seiners",
-  "REST-Seiners"
+  "NOR-seiners",
+  "FRO-seiners",
+  "ISL-seiners",
+  "RUS-seiners",
+  "EU+UK-seiners",
+  "REST-seiners"
 )%>% 
   future_map(~{ brick("./Objects/GFW_seiners.nc", varname = .x) %>%                 # Import a brick of all years
       calc(mean, na.rm = T) %>%                                             # Take the mean across years
@@ -79,30 +79,16 @@ Inflation_seiners <- c(
   data.table::rbindlist() %>% 
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-") 
 
-Inflation_ptrawlers <- c(
-  "NOR-Pelagic_trawlers",
-  "FRO-Pelagic_trawlers",
-  "ISL-Pelagic_trawlers",
-  "RUS-Pelagic_trawlers",
-  "EU+UK-Pelagic_trawlers",
-  "REST-Pelagic_trawlers"
-)%>% 
-  future_map(~{ brick("./Objects/GFW_ptrawlers.nc", varname = .x) %>%                 # Import a brick of all years
-      calc(mean, na.rm = T) %>%                                             # Take the mean across years
-      exact_extract(st_as_sf(domain), fun = "sum") %>%                      # Sum fishing hours within the model domain 
-      data.frame(Hours = ., Variable = .x)}, .progress = T)%>%             # Attach the variable name to keep track
-  data.table::rbindlist() %>% 
-  separate(Variable, into = c("Flag", "Gear_type"), sep = "-")
 
-Inflation_strawlers <- c(
-  "NOR-Shelf_trawlers",
-  "FRO-Shelf_trawlers",
-  "ISL-Shelf_trawlers",
-  "RUS-Shelf_trawlers",
-  "EU+UK-Shelf_trawlers",
-  "REST-Shelf_trawlers"
+Inflation_trawlers <- c(
+  "NOR-trawlers",
+  "FRO-trawlers",
+  "ISL-trawlers",
+  "RUS-trawlers",
+  "EU+UK-trawlers",
+  "REST-trawlers"
 )%>% 
-  future_map(~{ brick("./Objects/GFW_strawlers.nc", varname = .x) %>%                 # Import a brick of all years
+  future_map(~{ brick("./Objects/GFW_trawlers.nc", varname = .x) %>%                 # Import a brick of all years
       calc(mean, na.rm = T) %>%                                             # Take the mean across years
       exact_extract(st_as_sf(domain), fun = "sum") %>%                      # Sum fishing hours within the model domain 
       data.frame(Hours = ., Variable = .x)}, .progress = T)%>%             # Attach the variable name to keep track
@@ -129,24 +115,49 @@ Inflation_dredge <- c(
 
 
 
-Inflation<-rbind(Inflation_pole_and_line,Inflation_pots_and_traps,Inflation_seiners,Inflation_strawlers,Inflation_ptrawlers,Inflation_dredge)%>%
-  group_by(Gear_type) %>%                                                   # Now for each gear type
+Inflation <- rbind(Inflation_pole_and_line, Inflation_pots_and_traps, Inflation_seiners, Inflation_trawlers, Inflation_dredge) %>%
+  group_by(Gear_type) %>%
   mutate(total_gear_effort = sum(Hours)) %>% 
-  filter(!Flag %in% c("RUS","FRO","ISL")) %>%                                                 # Don't need Russian, Faroe or Iceland data anymore
-  summarise(Inflation = mean(total_gear_effort)/sum(Hours))%>%            # How do we get from non-Russian effort to our known total?
+  filter(!Flag %in% c("RUS","FRO","ISL","REST")) %>%
+  summarise(Inflation = mean(total_gear_effort) / sum(Hours),
+            Total_Hours = sum(Hours)) %>%  # Track total hours for weighting
   ungroup() %>%
   right_join(target) %>% 
-  mutate(Inflation = ifelse(Aggregated_gear %in% c("Harpoons", "Rifles", "Kelp harvesting", "Recreational","Dredging"),
-                          1, Inflation)) %>%
-  drop_na()%>%
-  column_to_rownames('Aggregated_gear') %>%                                 # Match names to EU and IMR objects
-  dplyr::select(Inflation) %>%                                              # Select only numeric column
-  as.matrix() %>%                                                           # Convert to matrix
-  .[order(row.names(.)),]                                                   # Alphabetise rows to ensure a match with other objects
+  drop_na(Aggregated_gear) %>%
+  group_by(Aggregated_gear) %>%
+  summarise(Inflation = ifelse(Aggregated_gear %in% c("Harpoons", "Rifles", "Kelp harvesting", "Recreational", "Dredging"),
+                               1,sum(Inflation * Total_Hours) / sum(Total_Hours))) %>%  # Weighted average
+  ungroup() %>%
+  distinct()%>% #drop_duplicates rownames
+  column_to_rownames('Aggregated_gear') %>%
+  dplyr::select(Inflation) %>%
+  as.matrix() %>%
+  .[order(row.names(.)),]
 
 ####  Scale to international effort ####
 
-International <- (EU + IMR+ Dredge) * Inflation                                                      
+Alien <- (EU + IMR+ Dredge) * Inflation - (IMR+ Dredge) 
+
+names(Alien) <- ifelse(
+  names(Alien) == "Pelagic_Trawlers", "Pelagic_Trawlers_ALIEN",
+  ifelse(names(Alien) == "Pelagic_Seiners", "Pelagic_Seiners_ALIEN", names(Alien))
+)
+Alien["Pelagic_Trawlers_NORW"] <- 0
+Alien["Pelagic_Seiners_NORW"] <- 0
+
+Alien<-Alien[order(names(Alien))]
+
+Norway<-IMR+Dredge
+names(Norway) <- ifelse(
+  names(Norway) == "Pelagic_Trawlers", "Pelagic_Trawlers_NORW",
+  ifelse(names(Norway) == "Pelagic_Seiners", "Pelagic_Seiners_NORW", names(Norway))
+)
+Norway["Pelagic_Trawlers_ALIEN"] <- 0
+Norway["Pelagic_Seiners_ALIEN"] <- 0
+
+Norway<-Norway[order(names(Norway))]
+
+International<-Alien+Norway
 
 International["Recreational"] <- 2363693.491  # Hours from Mike's stories
 
@@ -159,5 +170,5 @@ transformed_International["Kelp harvesting"] <- 1                           # We
 saveRDS(transformed_International, "./Objects/International effort by gear.rds")
 
 
-#readRDS("./Objects/International effort by gear.rds")
+#International<-readRDS("./Objects/International effort by gear.rds")
 

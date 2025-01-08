@@ -22,15 +22,11 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "EU+UK-pots_and_traps") %>%
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-Seiners") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-seiners") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_strawlers <- brick("./Objects/GFW_strawlers.nc", varname = "EU+UK-Shelf_trawlers") %>%      # For each class of gear
-  calc(mean, na.rm = T)%>%
-  projectRaster(crs = crs(Domains))
-
-GFW_ptrawlers <- brick("./Objects/GFW_ptrawlers.nc", varname = "EU+UK-Pelagic_trawlers") %>%      # For each class of gear
+GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "EU+UK-trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -57,7 +53,7 @@ EU_Arctic <- st_contains(Region_mask, EU, sparse = F) %>%                     # 
   t() %>%                                                                     # Transpose to indicate row not columns
   EU[.,] %>%                                                                  # Subset the Eu data spatially
   left_join(gears) %>%                                                        # Attach gear classifications
-  filter(Aggregated_gear != "Dropped") %>%  
+  filter(Aggregated_gear != "Dropped") %>%
   rownames_to_column(var = "EU_polygon") 
 tictoc::toc()
 #### Locate EU effort inside the model domain ####
@@ -68,17 +64,15 @@ on.exit(options(oopts))
 corrected_effort <- dplyr::select(EU_Arctic, EU_polygon, Gear_type) %>%       # Limit to information needed to calculate the proportion of fishing effort in the model domain
   split(f = as.factor(as.numeric(.$EU_polygon))) %>%                                                     # Isolate each shape for fast paralel processing
   future_map( ~{                                                              # In parallel
-    mutate(.x, total=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
-                               Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
-                               Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+    mutate(.x, total=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
+                               Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
                                Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
                                Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
                                Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>%                        # If this is a mobile gear) 
       # This is the total effort to scale features to within a polygon
       st_intersection(Domains) %>%     # Crop the polygons to the model domain
-      mutate(feature=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
-                               Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
-                               Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+      mutate(feature=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
+                               Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
                                Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
                                Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
                                Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>% 
@@ -97,7 +91,8 @@ saveRDS(corrected_effort, "./Objects/EU corrected pixel fishing effort.rds")  # 
 
 target <- expand.grid(Aggregated_gear = unique(gears$Aggregated_gear),        # Select gear names
                       year = 2015:2018) %>%                                   # Drop duplicates
-  filter(Aggregated_gear != "Dropped")                                        # Drop unused gears
+  filter(Aggregated_gear != "Dropped")                               # Drop unused gears
+
 
 summary <- group_by(corrected_effort, Aggregated_gear, year) %>%              # By year and gear
   summarise(effort = sum(effort_contributions, na.rm = TRUE)) %>%             # total the fishing effort

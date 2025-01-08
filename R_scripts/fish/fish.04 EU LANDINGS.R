@@ -26,7 +26,7 @@ Region_mask<-Region_mask%>%
 
 gear <- read.csv("./Data/MiMeMo_gears.csv")                                   # Load fishing gear classifications
 
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv") %>%                        # Get guilds for FAO codes
+guild <- read.csv("./Data/MiMeMo fish guilds.csv") %>%                        # Get guilds for FAO codes
   dplyr::select(FAO, Guild) %>% 
   rename(species = FAO) %>% 
   drop_na() %>% 
@@ -44,15 +44,12 @@ GFW_pots <- brick("./Objects/GFW_pots.nc", varname = "EU+UK-pots_and_traps") %>%
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-Seiners") %>%      # For each class of gear
+GFW_seiners <- brick("./Objects/GFW_seiners.nc", varname = "EU+UK-seiners") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-GFW_strawlers <- brick("./Objects/GFW_strawlers.nc", varname = "EU+UK-Shelf_trawlers") %>%      # For each class of gear
-  calc(mean, na.rm = T)%>%
-  projectRaster(crs = crs(Domains))
 
-GFW_ptrawlers <- brick("./Objects/GFW_ptrawlers.nc", varname = "EU+UK-Pelagic_trawlers") %>%      # For each class of gear
+GFW_trawlers <- brick("./Objects/GFW_trawlers.nc", varname = "EU+UK-trawlers") %>%      # For each class of gear
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
@@ -60,7 +57,7 @@ GFW_dredge <- brick("./Objects/GFW_dredge.nc", varname = "EU+UK-dredge_fishing")
   calc(mean, na.rm = T)%>%
   projectRaster(crs = crs(Domains))
 
-landings_target <- expand.grid(Guild = unique(read.csv2("./Data/MiMeMo fish guilds.csv")$Guild), # reintroduces guilds not in FAO 
+landings_target <- expand.grid(Guild = unique(read.csv("./Data/MiMeMo fish guilds.csv")$Guild), # reintroduces guilds not in FAO 
                                Aggregated_gear = unique(gear$Aggregated_gear),
                                year = 2015:2018) # Get combinations of gear, guild, and year to reintroduce unrepresented levels
 
@@ -89,17 +86,15 @@ on.exit(options(oopts))
 weights <- dplyr::select(EU_Arctic, EU_polygon, Gear_type) %>%                # Limit to information needed to calculate the proportion of fishing effort in the model domain
   split(f = as.factor(as.numeric(.$EU_polygon))) %>%# Isolate each shape for fast parallel processing
   future_map( ~{                                                              # In parallel
-    mutate(.x, total=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
-                               Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
-                               Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+    mutate(.x, total=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
+                               Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
                                Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
                                Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
                                Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum")))  %>%                        # If this is a mobile gear) 
     # This is the total effort to scale features to within a polygon
     st_intersection(Domains) %>%     # Crop the polygons to the model domain
-    mutate(feature=case_when(Gear_type == "Shelf_trawlers" ~ exact_extract(GFW_strawlers, .x, fun = "sum"), # Depending on gear type
-                             Gear_type == "Pelagic_trawlers" ~ exact_extract(GFW_ptrawlers, .x, fun = "sum"),
-                             Gear_type == "Seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
+    mutate(feature=case_when(Gear_type == "trawlers" ~ exact_extract(GFW_trawlers, .x, fun = "sum"), # Depending on gear type
+                             Gear_type == "seiners" ~ exact_extract(GFW_seiners, .x, fun = "sum"),
                              Gear_type == "pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets" ~ exact_extract(GFW_longlines, .x, fun = "sum"),
                              Gear_type == "pots_and_traps" ~ exact_extract(GFW_pots, .x, fun = "sum"),
                              Gear_type == "dredge_fishing" ~ exact_extract(GFW_dredge, .x, fun = "sum"))) %>%  

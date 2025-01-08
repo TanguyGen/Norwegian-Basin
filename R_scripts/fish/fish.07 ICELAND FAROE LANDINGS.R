@@ -17,7 +17,7 @@ gear <- read.csv("./Data/MiMeMo_gears.csv", check.names = FALSE)%>% # Import gea
 
 #################### For Iceland
 
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv",check.names = FALSE) %>%                        # Import guild names
+guild <- read.csv("./Data/MiMeMo fish guilds.csv",check.names = FALSE) %>%                        # Import guild names
   dplyr::select(Guild, `Statistics Iceland`) %>%
   setNames(c("Guild","Species"))%>% 
   drop_na() %>% 
@@ -56,7 +56,7 @@ saveRDS(Iceland_landings, "./Objects/Iceland landings by gear and guild.rds")
 
 #################### For Faroe
 
-guild <- read.csv2("./Data/MiMeMo fish guilds.csv") %>%                        # Import guild names
+guild <- read.csv("./Data/MiMeMo fish guilds.csv") %>%                        # Import guild names
   dplyr::select(Guild, `Hagstova.fororya`) %>%
   setNames(c("Guild","species"))%>%
   drop_na() %>%                                                               # Drop those without correspondance with Faroe data

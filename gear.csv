@@ -1,0 +1,56 @@
+Aggregated_gear,Gear_name,Gear_type,Gear_code,Gear_ISL,Gear_FRO,Gear_group,CODE,NORSK,ENGLISH,redskap
+Shelf_Trawlers_Seiners,Double trawl,trawlers,58,,,trawl,58,Dobbeltrål,Double trawl,Dobbeltrål
+Shelf_Trawlers_Seiners,Triple trawl,trawlers,59,,,trawl,59,Trippeltrål,Triple trawl,Trippeltrål
+Shelf_Trawlers_Seiners,Beam trawl,trawlers,56,,,trawl,56,Bomtrål,Beam trawl,Bomtrål
+Shelf_Trawlers_Seiners,Bottom trawl,trawlers,51,Bottom trawl,Bottom trawl: double trawl,trawl,51,Bunntrål,Bottom trawl,Bunntrål
+Shelf_Trawlers_Seiners,Bottom otter trawl,trawlers,OTB,,,trawl,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Otter twin trawls,trawlers,OTT,,Bottom trawl: otter trawl,,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Bottom pair trawl,trawlers,PTB,,Bottom trawl: pair trawling,trawl,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Shrimp trawl,trawlers,TBS,Shrimp trawl,Bottom trawl: prawn,trawl,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Shrimp trawl,trawlers,55,Shrimp trawl,Bottom trawl: prawn,trawl,55,Reketrål,Shrimp trawl,Reketrål
+Shelf_Trawlers_Seiners,,seiners,TBN,Neophrops trawl,,trawl,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Scottish seine (fly dragging),seiners,SSC,,,,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Scottish pair seine (fly dragging),seiners,SPR,,,,NA,NA,NA,NA
+Shelf_Trawlers_Seiners,Danish seine,seiners,61,Danish seine,Danish seine,,61,Snurrevad,Danish seine,Snurrevad
+Pelagic_Trawlers,Mid-water pair trawl,trawlers,PTM,,,trawl,NA,NA,NA,NA
+Pelagic_Trawlers,Mid-water otter trawl,trawlers,OTM,,Pelagic trawl: otter trawl,,NA,NA,NA,NA
+Pelagic_Trawlers,Pelagic trawl (pair),trawlers,54,,,,54,Flytetrål par,Pelagic trawl (pair),Flytetrål par
+Pelagic_Trawlers,Pelagic trawl,trawlers,53,Pelagic trawl,Pelagic trawl: pair trawl,,53,Flytetrål,Pelagic trawl,Flytetrål
+Longlines_and_Gillnets,Undefined hook gear,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,30,,,,30,Udefinert garn,Undefined hook gear,Udefinert garn
+Longlines_and_Gillnets,Other hook and line,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,32,,Long line: hand line,line,32,Line/krok,Other hook and line,Line/krok
+Longlines_and_Gillnets,Other hook and line,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,32,,Long line: hand line,line,32,Andre liner,Other hook and line,Andre liner
+Longlines_and_Gillnets,Floating hooks,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,31,,Long line: drifting,line,31,Flyteline,Floating hooks,Flyteline
+Longlines_and_Gillnets,Jigging,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,33,,Jigging line: automatic,line,33,Juksa/pilk,Jigging,Juksa/pilk
+Longlines_and_Gillnets,Jigging,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,33,,Jigging line: manual,line,33,Juksa/pilk,Jigging,Juksa/pilk
+Longlines_and_Gillnets,"Hooks & lines, handlines and pole lines (hand operated)",pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,LHP,Handline,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Handlines and pole lines (mechanised),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,LHM,,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Set longlines,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,LLS,Bottom longline,Long line: demersal,,NA,NA,NA,NA
+Longlines_and_Gillnets,Drifting longlines,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,LLD,,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Trolling lines,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,LTL,,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Undefined net,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,20,,,line,20,Garn,Undefined net,Garn
+Longlines_and_Gillnets,Undefined net,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,20,,,line,20,Udefinert garn,Undefined net,Udefinert garn
+Longlines_and_Gillnets,Gillnet (static),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,GNS,,Gill net: demersal,,NA,NA,NA,NA
+Longlines_and_Gillnets,Gillnet (static),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,22,,,,22,Settegarn,Gillnet (static),Settegarn
+Longlines_and_Gillnets,Gillnet (drifting),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,GND,Bottom gillnet,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Gillnet (drifting),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,21,,Gill net: drifting,,21,Drivgarn,Gillnet (drifting),Drivgarn
+Longlines_and_Gillnets,Gillnets (circling),pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,GNC,,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Combined gillnets-trammel nets,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,GTN,,,,NA,NA,NA,NA
+Longlines_and_Gillnets,Combined gillnets-trammel nets,pole_and_line+set_longlines+squid_jigger+drifting_longlines+set_gillnets,GTR,,,,NA,NA,NA,NA
+Pelagic_Seiners,Purse seine,seiners,11,Purse seine,,,11,Snurpenot/ringnot,Purse seine,Snurpenot/ringnot
+Pelagic_Seiners,Undefined  seine,seiners,10,Purse seine,,,10,Udefinert not,Undefined seine net ,Udefinert not
+Pelagic_Seiners,Undefined  seine,seiners,10,Purse seine,,,10,Notredskap,Undefined seine net ,Notredskap
+Pelagic_Seiners,Seine: ring net,seiners,PS1,,Seine: ring net,,NA,NA,NA,NA
+Pelagic_Seiners,Seine: two ships,seiners,PS2,,Seine: two ships,,NA,NA,NA,NA
+Pelagic_Seiners,lampara,seiners,LA,,,,NA,NA,NA,NA
+Pots,Pot,pots_and_traps,42,,,,42,Teiner,Pot,Teiner
+Pots,Pots,pots_and_traps,FPO,,,,NA,NA,NA,NA
+Pots,Traps,pots_and_traps,FIX,,,,NA,NA,NA,NA
+Pots,,pots_and_traps,41,Whelk trap,Traps,,41,Ruser,Fyke net,Ruser
+Dropped,Other,,80,,,,80,Annet,Other,Annet
+Dropped,Unkown,,NK,,,,NA,NA,NA,NA
+Harpoons,Harpoon and similar unspecified types,,70,,,,70,Harpun og lignende uspesifiserte typer,Harpoon and similar unspecified types,Harpun og lignende uspesifiserte typer
+Kelp harvesting,Kelp harvesting,,Seaweed,,,,NA,NA,NA,NA
+Dredging,Dredge,dredge_fishing,81,,,,81,Skjellskrape,Hand rake,Skjellskrape
+Dredging,,dredge_fishing,DRB,Shellfish dredge,,,NA,NA,NA,NA
+Dredging,,dredge_fishing,DRM,Scallop dredge,Scallop dredge,,NA,NA,NA,NA
+Recreational,Recreational,,DUMMY,,,,NA,NA,NA,NA

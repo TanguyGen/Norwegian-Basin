@@ -43,45 +43,33 @@ Proportion_effort_pots_and_traps <- c(
   rbindlist()
 
 Proportion_effort_seiners <- c(
-  "NOR-Seiners",
-  "FRO-Seiners",
-  "ISL-Seiners",
-  "RUS-Seiners",
-  "EU+UK-Seiners",
-  "REST-Seiners"
+  "NOR-seiners",
+  "FRO-seiners",
+  "ISL-seiners",
+  "RUS-seiners",
+  "EU+UK-seiners",
+  "REST-seiners"
 )%>%
   future_map(~{ brick("./Objects/GFW_seiners.nc", varname = .x) %>%                   # Import a brick of all years
       exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 
       mutate(Variable = .x) %>%                                            # Attach the variable name to keep track
       cbind(sf::st_drop_geometry(habitats))})%>%
   rbindlist()
-Proportion_effort_ptrawlers <- c(
-  "NOR-Pelagic_trawlers",
-  "FRO-Pelagic_trawlers",
-  "ISL-Pelagic_trawlers",
-  "RUS-Pelagic_trawlers",
-  "EU+UK-Pelagic_trawlers",
-  "REST-Pelagic_trawlers"
+
+Proportion_effort_trawlers <- c(
+  "NOR-trawlers",
+  "FRO-trawlers",
+  "ISL-trawlers",
+  "RUS-trawlers",
+  "EU+UK-trawlers",
+  "REST-trawlers"
 )%>%
-  future_map(~{ brick("./Objects/GFW_ptrawlers.nc", varname = .x) %>%                   # Import a brick of all years
+  future_map(~{ brick("./Objects/GFW_trawlers.nc", varname = .x) %>%                   # Import a brick of all years
       exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 
       mutate(Variable = .x) %>%                                            # Attach the variable name to keep track
       cbind(sf::st_drop_geometry(habitats))})%>%
   rbindlist()
 
-Proportion_effort_strawlers <- c(
-  "NOR-Shelf_trawlers",
-  "FRO-Shelf_trawlers",
-  "ISL-Shelf_trawlers",
-  "RUS-Shelf_trawlers",
-  "EU+UK-Shelf_trawlers",
-  "REST-Shelf_trawlers"
-)%>%
-  future_map(~{ brick("./Objects/GFW_strawlers.nc", varname = .x) %>%                   # Import a brick of all years
-      exact_extract(habitats, fun = "sum") %>%                             # Sum fishing hours within habitat types 
-      mutate(Variable = .x) %>%                                            # Attach the variable name to keep track
-      cbind(sf::st_drop_geometry(habitats))})%>%
-  rbindlist()
 
 Proportion_effort_dredge <-c(
   "NOR-dredge_fishing",
@@ -99,7 +87,7 @@ Proportion_effort_dredge <-c(
 
 gear <- read.csv("./Data/MiMeMo_gears.csv")   
 
-Proportion_effort<-data.table::rbindlist(list(Proportion_effort_pole_and_line,Proportion_effort_pots_and_traps,Proportion_effort_seiners,Proportion_effort_strawlers,Proportion_effort_ptrawlers,Proportion_effort_dredge)) %>% 
+Proportion_effort<-data.table::rbindlist(list(Proportion_effort_pole_and_line,Proportion_effort_pots_and_traps,Proportion_effort_seiners,Proportion_effort_trawlers,Proportion_effort_dredge)) %>% 
   pivot_longer(starts_with("sum"), names_to = "Year", values_to = "Hours") %>%# Reshape so all years are in a column
   separate(Variable, into = c("Flag", "Gear_type"), sep = "-") %>%# Split variable name into flag and gear type
   left_join(gear)%>%
@@ -134,3 +122,15 @@ ggplot(Flag) +
 
 ggsave("./Figures/GFW_no habitats.png")
 
+
+## Ignoring years
+
+Hab <- group_by(Proportion_effort, Flag, Aggregated_gear, Habitat,Shore) %>% 
+  summarise(Proportion = mean(Proportion)) %>% 
+  ungroup()
+
+ggplot(Hab)+
+  geom_col(aes(x = Flag, y = Proportion, fill = paste0(Shore, " ", Habitat)), position = "dodge2")+
+  facet_grid(rows = vars(Aggregated_gear)) +
+  theme_minimal() +
+  theme()
